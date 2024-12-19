@@ -3,10 +3,11 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from utils.calculate_cost import calculate_cost
 from google.cloud import firestore
 from langchain_google_firestore import FirestoreChatMessageHistory
+from langchain.llms import BaseLLM
 
 
 class ChatConversationLLM:
-    def __init__(self, llm):
+    def __init__(self, llm: BaseLLM):
         self.llm = llm
         self.model_name = llm.model_name
 
