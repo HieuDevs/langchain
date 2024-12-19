@@ -11,6 +11,9 @@ class ChatConversationLLM:
         self.model_name = llm.model_name
 
     def chat_model_conversation(self, stream=True):
+        print("\n--------------------------------")
+        print("Chatting with model: ", self.model_name)
+        print("--------------------------------\n")
         chat_history = []
         system_message = "You are a helpful assistant."
         total_cost = 0
@@ -23,17 +26,17 @@ class ChatConversationLLM:
             start_time = time.time()
             aggregate = None
             if stream:
-                print("AI: ", end="\n", flush=True)
+                print("AI: ", end="", flush=True)
                 for chunk in self.llm.stream(chat_history, stream_usage=True):
                     print(chunk.content, end="", flush=True)
                     aggregate = chunk if aggregate is None else aggregate + chunk
             else:
                 response = self.llm.invoke(chat_history)
                 aggregate = response
-                print(f"AI: {aggregate.content}", end="\n", flush=True)
+                print(f"AI: {aggregate.content}", end="", flush=True)
             end_time = time.time()
             chat_history.append(AIMessage(content=aggregate.content))
-            print("\n---METADATA---")
+            print("\n\n---METADATA---")
             token_usage = aggregate.usage_metadata
             # 'input_tokens': *, 'output_tokens': *, 'total_tokens': *
             print(f"Input tokens: {token_usage['input_tokens']}")
@@ -50,7 +53,9 @@ class ChatConversationLLM:
             print("---END METADATA---")
 
     def chat_model_conversation_with_save_to_firestore(self, stream=True):
-
+        print("\n--------------------------------")
+        print("Chatting with model: ", self.model_name)
+        print("--------------------------------\n")
         # SETUP FIREBASE FIRESTORE
         PROJECT_ID = "niubii-mobile-aef07"
         SESSION_ID = "session_new"
@@ -86,18 +91,18 @@ class ChatConversationLLM:
             start_time = time.time()
             aggregate = None
             if stream:
-                print("AI: ", end="\n", flush=True)
+                print("AI: ", end="", flush=True)
                 for chunk in self.llm.stream(chat_history.messages, stream_usage=True):
                     print(chunk.content, end="", flush=True)
                     aggregate = chunk if aggregate is None else aggregate + chunk
             else:
                 response = self.llm.invoke(chat_history.messages)
                 aggregate = response
-                print(f"AI: {aggregate.content}", end="\n", flush=True)
+                print(f"AI: {aggregate.content}", end="", flush=True)
             end_time = time.time()
             chat_history.add_message(AIMessage(content=aggregate.content))
 
-            print("\n---METADATA---")
+            print("\n\n---METADATA---")
             token_usage = aggregate.usage_metadata
             # 'input_tokens': *, 'output_tokens': *, 'total_tokens': *
             print(f"Input tokens: {token_usage['input_tokens']}")
