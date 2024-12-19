@@ -1,0 +1,12 @@
+[project]
+name = "langchain-tutorial"
+version = "0.1.0"
+description = "Langchain tutorial"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "langchain-google-firestore>=0.5.0",
+    "langchain>=0.1.0",
+    "python-dotenv>=1.0.1",
+    "langchain-openai>=0.1.9",
+]
