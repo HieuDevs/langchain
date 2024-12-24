@@ -59,3 +59,4 @@ dmypy.json
 .DS_Store
 run.sh
 uv.lock
+*/db

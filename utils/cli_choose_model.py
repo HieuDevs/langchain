@@ -1,5 +1,6 @@
 from utils.constants import ModelProviders
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 
 def cli_choose_model_provider_and_return_llm():
@@ -19,13 +20,15 @@ def cli_choose_model_provider_and_return_llm():
                 continue
             provider_selected = list(ModelProviders)[index - 1]
             if provider_selected == ModelProviders.OPEN_AI:
-                llm = ChatOpenAI(temperature=0.6, verbose=True)
+                pass
+            elif provider_selected == ModelProviders.GOOGLE:
+                pass
             else:
                 print("Provider not supported. Please try again.")
                 continue
             break
-        except ValueError:
-            print("Please enter a valid number.")
+        except ValueError as e:
+            print(f"Please enter a valid number. Error: {e}")
     while True:
         print("--------------------------------")
         print("Available models:")
@@ -39,9 +42,12 @@ def cli_choose_model_provider_and_return_llm():
                 print("Invalid index. Please try again.")
                 continue
             model_selected = models[index - 1]
-            llm.model_name = model_selected
+            if provider_selected == ModelProviders.GOOGLE:
+                llm = ChatGoogleGenerativeAI(model=model_selected, verbose=True)
+            elif provider_selected == ModelProviders.OPEN_AI:
+                llm = ChatOpenAI(model=model_selected, verbose=True)
             break
-        except ValueError:
-            print("Please enter a valid number.")
+        except ValueError as e:
+            print(f"Please enter a valid number. Error: {e}")
             continue
     return llm

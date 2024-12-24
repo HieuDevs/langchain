@@ -7,6 +7,9 @@ requires-python = ">=3.9,<3.13"
 dependencies = [
     "langchain-google-firestore>=0.5.0",
     "langchain>=0.1.0",
-    "python-dotenv>=1.0.1",
+    "langchain-google-genai>=2.0.7",
     "langchain-openai>=0.1.9",
+    "python-dotenv>=1.0.1",
+    "langchain-chroma>=0.1.4",
+    "pypdf>=5.1.0",
 ]

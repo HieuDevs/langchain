@@ -4,21 +4,28 @@ from utils.calculate_cost import calculate_cost
 from google.cloud import firestore
 from langchain_google_firestore import FirestoreChatMessageHistory
 from langchain.llms import BaseLLM
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 
 class ChatConversationLLM:
-    def __init__(self, llm: BaseLLM):
+    def __init__(self, llm: BaseLLM, default_system_message: str = None):
         self.llm = llm
-        self.model_name = llm.model_name
+        self.default_system_message = (
+            default_system_message or """You are a helpful assistant."""
+        )
+
+        if isinstance(self.llm, ChatGoogleGenerativeAI):
+            self.model_name = self.llm.model.split("/")[-1]
+        else:
+            self.model_name = self.llm.model_name
 
     def chat_model_conversation(self, stream=True):
         print("\n--------------------------------")
         print("Chatting with model: ", self.model_name)
         print("--------------------------------\n")
         chat_history = []
-        system_message = "You are a helpful assistant."
         total_cost = 0
-        chat_history.append(SystemMessage(content=system_message))
+        chat_history.append(SystemMessage(content=self.default_system_message))
         while True:
             user_input = input("You: ")
             if user_input.lower() in ["exit", "quit", "bye", "goodbye"]:
@@ -28,12 +35,18 @@ class ChatConversationLLM:
             aggregate = None
             if stream:
                 print("AI: ", end="", flush=True)
-                for chunk in self.llm.stream(chat_history, stream_usage=True):
-                    print(chunk.content, end="", flush=True)
-                    aggregate = chunk if aggregate is None else aggregate + chunk
+                if isinstance(self.llm, ChatGoogleGenerativeAI):
+                    for chunk in self.llm.stream(chat_history):
+                        print(chunk.content, end="", flush=True)
+                        aggregate = chunk if aggregate is None else aggregate + chunk
+                else:
+                    for chunk in self.llm.stream(chat_history, stream_usage=True):
+                        print(chunk.content, end="", flush=True)
+                        aggregate = chunk if aggregate is None else aggregate + chunk
             else:
                 response = self.llm.invoke(chat_history)
                 aggregate = response
+                print(response)
                 print(f"AI: {aggregate.content}", end="", flush=True)
             end_time = time.time()
             chat_history.append(AIMessage(content=aggregate.content))
@@ -81,9 +94,7 @@ class ChatConversationLLM:
             print("------END HISTORY------")
         else:
             print("No chat history found.")
-            chat_history.add_message(
-                SystemMessage(content="You are a helpful assistant.")
-            )
+            chat_history.add_message(SystemMessage(content=self.default_system_message))
         while True:
             user_input = input("You: ")
             if user_input.lower() in ["exit", "quit", "bye", "goodbye"]:
@@ -93,9 +104,16 @@ class ChatConversationLLM:
             aggregate = None
             if stream:
                 print("AI: ", end="", flush=True)
-                for chunk in self.llm.stream(chat_history.messages, stream_usage=True):
-                    print(chunk.content, end="", flush=True)
-                    aggregate = chunk if aggregate is None else aggregate + chunk
+                if isinstance(self.llm, ChatGoogleGenerativeAI):
+                    for chunk in self.llm.stream(chat_history.messages):
+                        print(chunk.content, end="", flush=True)
+                        aggregate = chunk if aggregate is None else aggregate + chunk
+                else:
+                    for chunk in self.llm.stream(
+                        chat_history.messages, stream_usage=True
+                    ):
+                        print(chunk.content, end="", flush=True)
+                        aggregate = chunk if aggregate is None else aggregate + chunk
             else:
                 response = self.llm.invoke(chat_history.messages)
                 aggregate = response
